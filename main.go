@@ -20,9 +20,6 @@ func Init() {
 func main() {
 	fmt.Println("Initializing SDL")
 	Init()
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
-	}
 
 	window, err := sdl.CreateWindow(
 		"GoGome",
