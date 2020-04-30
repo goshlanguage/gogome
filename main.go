@@ -9,12 +9,20 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func main() {
-	fmt.Println("Initializing SDL")
+// Init allows the user to initialize everything necessary for the game engine
+func Init() {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
 	defer sdl.Quit()
+}
+
+func main() {
+	fmt.Println("Initializing SDL")
+	Init()
+	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+		panic(err)
+	}
 
 	window, err := sdl.CreateWindow(
 		"GoGome",
