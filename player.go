@@ -15,7 +15,7 @@ type Player struct {
 
 func NewPlayer(renderer *sdl.Renderer) (*Player, error) {
 	img, err := sdl.LoadBMP("sprites/npc.bmp")
-	errHelper(err)
+	checkErr(err)
 	defer img.Free()
 
 	playerTexture, err := renderer.CreateTextureFromSurface(img)

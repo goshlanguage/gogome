@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -9,17 +8,17 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-// Init allows the user to initialize everything necessary for the game engine
-func Init() {
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
-	}
-	defer sdl.Quit()
-}
+var (
+	fonts = []string{"fonts/monogram.ttf"}
+)
 
 func main() {
-	fmt.Println("Initializing SDL")
-	Init()
+	e := NewEngine()
+	text, err := e.Fonts[0].RenderUTF8Shaded(
+		"Hello!",
+		sdl.Color{200, 200, 200, 255},
+		sdl.Color{255, 255, 255, 255},
+	)
 
 	window, err := sdl.CreateWindow(
 		"GoGome",
@@ -29,32 +28,27 @@ func main() {
 		600,
 		sdl.WINDOW_OPENGL,
 	)
-	errHelper(err)
+	checkErr(err)
 	defer window.Destroy()
 
 	window.UpdateSurface()
 
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
-	errHelper(err)
+	checkErr(err)
 	defer renderer.Destroy()
 
 	player, err := NewPlayer(renderer)
-	errHelper(err)
+	checkErr(err)
 
 	level, err := NewLevel("sprites/background.bmp", renderer)
-	errHelper(err)
-
-	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
-		errHelper(err)
-	}
-	defer mix.CloseAudio()
+	checkErr(err)
 
 	// Load in BG wav
 	data, err := ioutil.ReadFile("sfx/streets.wav")
-	errHelper(err)
+	checkErr(err)
 
 	chunk, err := mix.QuickLoadWAV(data)
-	errHelper(err)
+	checkErr(err)
 	defer chunk.Free()
 
 	chunk.Play(1, 0)
@@ -65,8 +59,8 @@ func main() {
 			case *sdl.QuitEvent:
 				os.Exit(0)
 			case *sdl.KeyboardEvent:
-				fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
-					t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
+				//fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
+				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 				if string(t.Keysym.Sym) == "s" && t.State == 1 {
 					if player.y <= 536 {
 						player.move(0, 8)
@@ -87,7 +81,6 @@ func main() {
 						player.move(-8, 0)
 					}
 				}
-
 			}
 		}
 		renderer.SetDrawColor(255, 255, 255, 255)
@@ -105,11 +98,13 @@ func main() {
 			&sdl.Rect{X: player.x, Y: player.y, W: 32, H: 64},
 		)
 
+		renderer.Copy(nil, &text.ClipRect, &sdl.Rect{X: 400, Y: 400, W: 100, H: 36})
+
 		renderer.Present()
 	}
 }
 
-func errHelper(err error) {
+func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}

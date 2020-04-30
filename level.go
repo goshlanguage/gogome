@@ -8,9 +8,10 @@ type Level struct {
 	Texture *sdl.Texture
 }
 
+// NewLevel takes in the filepath of a level's background, and a renderer
 func NewLevel(filepath string, renderer *sdl.Renderer) (*Level, error) {
 	img, err := sdl.LoadBMP(filepath)
-	errHelper(err)
+	checkErr(err)
 	defer img.Free()
 
 	bgTexture, err := renderer.CreateTextureFromSurface(img)
