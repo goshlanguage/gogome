@@ -1,10 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 
-	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -14,6 +12,7 @@ var (
 
 func main() {
 	e := NewEngine()
+	e.Init()
 	text, err := e.Fonts[0].RenderUTF8Shaded(
 		"Hello!",
 		sdl.Color{200, 200, 200, 255},
@@ -43,17 +42,14 @@ func main() {
 	level, err := NewLevel("sprites/background.bmp", renderer)
 	checkErr(err)
 
-	// Load in BG wav
-	data, err := ioutil.ReadFile("sfx/streets.wav")
+	// Play BG Wav
+	chunk, err := QueueWAV("sfx/streets.wav")
 	checkErr(err)
-
-	chunk, err := mix.QuickLoadWAV(data)
-	checkErr(err)
-	defer chunk.Free()
-
-	chunk.Play(1, 0)
+	level.Sounds["background"] = append(level.Sounds["background"], chunk)
+	e.PlayWAV(level.Sounds["background"][0])
 
 	for {
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
@@ -63,22 +59,22 @@ func main() {
 				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 				if string(t.Keysym.Sym) == "s" && t.State == 1 {
 					if player.y <= 536 {
-						player.move(0, 8)
+						player.move(0, 1, 1)
 					}
 				}
 				if string(t.Keysym.Sym) == "w" && t.State == 1 {
 					if player.y >= 0 {
-						player.move(0, -8)
+						player.move(0, -1, 1)
 					}
 				}
 				if string(t.Keysym.Sym) == "d" && t.State == 1 {
 					if player.x < 800 {
-						player.move(8, 0)
+						player.move(1, 0, 1)
 					}
 				}
 				if string(t.Keysym.Sym) == "a" && t.State == 1 {
 					if player.x > 0 {
-						player.move(-8, 0)
+						player.move(-1, 0, 1)
 					}
 				}
 			}
@@ -91,11 +87,6 @@ func main() {
 			level.Texture,
 			&sdl.Rect{X: 0, Y: 0, W: 800, H: 600},
 			&sdl.Rect{X: 0, Y: 0, W: 800, H: 600},
-		)
-		renderer.Copy(
-			player.texture,
-			&sdl.Rect{X: player.spriteXPos * 16, Y: player.spriteYPos * 32, W: 16, H: 32},
-			&sdl.Rect{X: player.x, Y: player.y, W: 32, H: 64},
 		)
 
 		renderer.Copy(nil, &text.ClipRect, &sdl.Rect{X: 400, Y: 400, W: 100, H: 36})

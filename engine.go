@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
@@ -18,6 +19,7 @@ type GameEngine interface {
 type Engine struct {
 	Fonts    []*ttf.Font
 	Entities *sdl.Surface
+	Channels int
 }
 
 // NewEngine creates and instanciates our engine
@@ -58,4 +60,28 @@ func AddFont(fontPaths ...string) {
 	for _, path := range fontPaths {
 		fmt.Printf("FONT FOUND: %s", path)
 	}
+}
+
+// QueueWAV uses the initialized mixer and plays a WAV on the first channel
+func QueueWAV(filepath string) (*mix.Chunk, error) {
+	// Load in BG wav
+	data, err := ioutil.ReadFile("sfx/streets.wav")
+	if err != nil {
+		return &mix.Chunk{}, err
+	}
+
+	chunk, err := mix.QuickLoadWAV(data)
+	if err != nil {
+		return &mix.Chunk{}, err
+	}
+	// defer chunk.Free()
+	return chunk, nil
+}
+
+// PlayWAV is blocking, please call it as a go routine
+// Increments channels first so we don't inadvertently stop playing of another chunk
+// This logic is really poor and doesn't garbage collect.
+func (e *Engine) PlayWAV(chunk *mix.Chunk) {
+	e.Channels++
+	chunk.Play(e.Channels, 0)
 }
