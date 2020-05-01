@@ -9,23 +9,15 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 )
 
-// GameEngine is here in the event we need a testing mock.
-type GameEngine interface {
-	Init()
-	AddFont(fontPath ...string)
-}
-
 // Engine holds all of the assets necessary to run a 2D engine
 type Engine struct {
 	Fonts    []*ttf.Font
 	Entities *sdl.Surface
-	Channels int
 }
 
 // NewEngine creates and instanciates our engine
 func NewEngine() *Engine {
 	e := &Engine{}
-	e.Init()
 	return e
 }
 
@@ -43,16 +35,10 @@ func (e *Engine) Init() {
 		checkErr(err)
 	}
 
-	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
-		checkErr(err)
-	}
-	// defer mix.CloseAudio()
-
 	font, err := ttf.OpenFont("fonts/monogram.ttf", 32)
 	checkErr(err)
 
 	e.Fonts = append(e.Fonts, font)
-
 }
 
 // AddFont provides a helper to variadically add fonts to the engine
@@ -82,6 +68,5 @@ func QueueWAV(filepath string) (*mix.Chunk, error) {
 // Increments channels first so we don't inadvertently stop playing of another chunk
 // This logic is really poor and doesn't garbage collect.
 func (e *Engine) PlayWAV(chunk *mix.Chunk) {
-	e.Channels++
-	chunk.Play(e.Channels, 0)
+	chunk.Play(-1, 0)
 }
