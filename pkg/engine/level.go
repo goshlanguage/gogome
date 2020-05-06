@@ -1,4 +1,4 @@
-package main
+package engine
 
 import (
 	"github.com/veandco/go-sdl2/mix"
@@ -17,10 +17,10 @@ type Level struct {
 
 // Tile represents a tile in a tilemap. This might be a 16x16 sprite or a 16x128 tile.
 type Tile struct {
-	x0 int32
-	x1 int32
-	y0 int32
-	y1 int32
+	X0 int32
+	X1 int32
+	Y0 int32
+	Y1 int32
 }
 
 // NewLevel takes in the filepath of a level's background, and a renderer

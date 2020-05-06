@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/ryanhartje/gogome/pkg/engine"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -17,7 +18,7 @@ var (
 )
 
 func main() {
-	e := NewEngine()
+	e := engine.NewEngine()
 	e.Init()
 
 	window, err := sdl.CreateWindow(
@@ -37,19 +38,23 @@ func main() {
 	checkErr(err)
 	defer renderer.Destroy()
 
-	player, err := NewPlayer(renderer)
+	player, err := engine.NewPlayer(renderer)
 	checkErr(err)
 
 	// Load in our level asset and generate a plain map
-	level, err := NewLevel("sprites/overworld.bmp", renderer)
+	level, err := engine.NewLevel("sprites/overworld.bmp", renderer)
 	checkErr(err)
-	grass := Tile{x0: 0, x1: 16, y0: 0, y1: 16}
-	mapping := map[int]map[int]Tile{}
+	grass := engine.Tile{X0: 0, X1: 16, Y0: 0, Y1: 16}
+	grass2 := engine.Tile{X0: 272, X1: 303, Y0: 464, Y1: 495}
+	mapping := map[int]map[int]engine.Tile{}
 	// Generate a plain grass map
 	for x := 0; x < winW; x += 16 {
-		mapping[x] = make(map[int]Tile)
+		mapping[x] = make(map[int]engine.Tile)
 		for y := 0; y < winH; y += 16 {
 			mapping[x][y] = grass
+			if y > (winH - 64) {
+				mapping[x][y] = grass2
+			}
 		}
 	}
 	level.TileMap = mapping
@@ -60,7 +65,7 @@ func main() {
 	defer mix.CloseAudio()
 
 	// Play BG Wav
-	chunk, err := QueueWAV("sfx/streets.wav")
+	chunk, err := engine.QueueWAV("sfx/streets.wav")
 	checkErr(err)
 	level.Sounds["background"] = append(level.Sounds["background"], chunk)
 	// e.PlayWAV(level.Sounds["background"][0])
@@ -69,7 +74,7 @@ func main() {
 	renderer.Clear()
 
 	// setup a dummy enemy for demo
-	enemy, err := NewEnemy(384, 150, renderer)
+	enemy, err := engine.NewEnemy(384, 150, renderer)
 	checkErr(err)
 
 	for {
@@ -89,12 +94,12 @@ func main() {
 		for x := 0; x < winW; x += 16 {
 			for y := 0; y < winH; y += 16 {
 				tile := level.TileMap[x][y]
-				width := tile.x1 - tile.x0
-				height := tile.y1 - tile.y0
+				width := tile.X1 - tile.X0
+				height := tile.Y1 - tile.Y0
 				// Render the background of the level
 				renderer.Copy(
 					level.Texture,
-					&sdl.Rect{X: tile.x0, Y: tile.y0, W: width, H: height},
+					&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
 					&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
 				)
 			}
