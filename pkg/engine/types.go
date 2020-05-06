@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -26,8 +25,9 @@ func NewText(renderer *sdl.Renderer, text string, x float64, y float64) *Text {
 	}
 }
 
+// Draw for Text requires creating the surface, then copying the surface object onto a rectangle,
+//   then rendering that rectangle to the screen
 func (t *Text) Draw() {
-	gfx.StringRGBA(t.renderer, int32(t.x), int32(t.y), t.text, 255, 255, 255, 255)
 	surface, err := t.font.RenderUTF8Solid(t.text, sdl.Color{255, 255, 255, 255})
 	checkErr(err)
 	box := sdl.Rect{int32(t.x), int32(t.y), surface.W, surface.H}
@@ -39,6 +39,7 @@ func (t *Text) Draw() {
 
 }
 
+// Update exists to fulfill the entities interface contract
 func (t *Text) Update() {
 
 }

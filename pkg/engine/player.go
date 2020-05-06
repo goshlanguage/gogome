@@ -87,24 +87,24 @@ func (player *Player) Update() {
 
 func (player *Player) move(x float64, y float64) {
 	// Don't let player move beyond bounds, but DO update their animation
-	if player.x >= 0 && player.x <= 764 {
+	if player.x >= 392 && player.x <= 400 {
 		player.x += x * speed
 	} else {
-		if player.x < 0 {
-			player.x = 0
+		if player.x < 392 {
+			player.x = 392
 		}
-		if player.x > 764 {
-			player.x = 764
+		if player.x > 400 {
+			player.x = 400
 		}
 	}
-	if player.y >= 0 && player.y <= 536 {
+	if player.y >= 268 && player.y <= 276 {
 		player.y += y * speed
 	} else {
-		if player.y < 0 {
-			player.y = 0
+		if player.y < 268 {
+			player.y = 268
 		}
-		if player.y > 536 {
-			player.y = 536
+		if player.y > 276 {
+			player.y = 276
 		}
 	}
 	player.frame++

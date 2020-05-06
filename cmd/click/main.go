@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/ryanhartje/gogome/pkg/engine"
@@ -77,7 +78,7 @@ func main() {
 	enemy, err := engine.NewEnemy(384, 150, renderer)
 	checkErr(err)
 
-	entities := []engine.Entity{}
+	entities := []engine.Entity{player, enemy}
 
 	for {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -88,7 +89,8 @@ func main() {
 			case *sdl.MouseButtonEvent:
 				x, y, state := sdl.GetMouseState()
 				if state == 1 {
-					text := engine.NewText(renderer, "WOAH!", float64(x), float64(y))
+					coords := fmt.Sprintf("(%d, %d)", x, y)
+					text := engine.NewText(renderer, coords, float64(x), float64(y))
 					entities = append(entities, text)
 				}
 			}
@@ -118,12 +120,6 @@ func main() {
 			e.Draw()
 			e.Update()
 		}
-
-		enemy.Draw()
-		enemy.Update()
-		//renderer.Copy(nil, &text.ClipRect, &sdl.Rect{X: 400, Y: 400, W: 100, H: 36})
-		player.Draw()
-		player.Update()
 
 		renderer.Present()
 	}
