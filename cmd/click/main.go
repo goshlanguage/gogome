@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/ryanhartje/gogome/pkg/engine"
-	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -78,6 +77,8 @@ func main() {
 	enemy, err := engine.NewEnemy(384, 150, renderer)
 	checkErr(err)
 
+	entities := []engine.Entity{}
+
 	for {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
@@ -85,8 +86,10 @@ func main() {
 				os.Exit(0)
 
 			case *sdl.MouseButtonEvent:
-				if sdl.MOUSEBUTTONDOWN == 1 {
-					gfx.LineRGBA(renderer, 0, 0, winW, winH, 100, 0, 0, 90)
+				x, y, state := sdl.GetMouseState()
+				if state == 1 {
+					text := engine.NewText(renderer, "WOAH!", float64(x), float64(y))
+					entities = append(entities, text)
 				}
 			}
 			// Setup ESC to exit keybinding
@@ -108,7 +111,12 @@ func main() {
 					&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
 					&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
 				)
+				// gfx.LineRGBA(renderer, 0, 0, int32(x), int32(y), 100, 0, 0, 100)
 			}
+		}
+		for _, e := range entities {
+			e.Draw()
+			e.Update()
 		}
 
 		enemy.Draw()

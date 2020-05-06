@@ -1,7 +1,7 @@
 package engine
 
-import "github.com/veandco/go-sdl2/sdl"
-
-type Entity struct {
-	Surfaces []*sdl.Surface
+// Entity is an interface that aides the engine in having commmon functionality
+type Entity interface {
+	Draw()
+	Update()
 }
