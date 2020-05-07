@@ -50,9 +50,9 @@ func main() {
 	grass2 := engine.Tile{X0: 272, X1: 303, Y0: 464, Y1: 495}
 	mapping := map[int]map[int]engine.Tile{}
 	// Generate a plain grass map
-	for x := 0; x < winW; x += 16 {
+	for x := 0; x < winW; x++ {
 		mapping[x] = make(map[int]engine.Tile)
-		for y := 0; y < winH; y += 16 {
+		for y := 0; y < winH; y++ {
 			mapping[x][y] = grass
 			if y > (winH - 64) {
 				mapping[x][y] = grass2
