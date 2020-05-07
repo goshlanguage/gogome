@@ -1,6 +1,9 @@
 package engine
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/veandco/go-sdl2/img"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 const speed = 0.75
 
@@ -22,14 +25,9 @@ type Player struct {
 
 // NewPlayer is a Player factory that sets it's defaults and returns it
 func NewPlayer(renderer *sdl.Renderer) (*Player, error) {
-	img, err := sdl.LoadBMP("sprites/npc.bmp")
-	checkErr(err)
-	defer img.Free()
 
-	playerTexture, err := renderer.CreateTextureFromSurface(img)
-	if err != nil {
-		return &Player{}, err
-	}
+	texture, err := img.LoadTexture(renderer, "sprites/character.png")
+	checkErr(err)
 
 	return &Player{
 		frame:      0,
@@ -37,10 +35,10 @@ func NewPlayer(renderer *sdl.Renderer) (*Player, error) {
 		renderer:   renderer,
 		spriteXPos: 1,
 		spriteYPos: 1,
-		texture:    playerTexture,
+		texture:    texture,
 		// Place the user in the middle of the screen, assuming 800x600 minus half the sprite size
-		x: 384.0,
-		y: 292.0,
+		x: 396.0,
+		y: 272.0,
 	}, nil
 }
 

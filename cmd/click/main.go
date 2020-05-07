@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/ryanhartje/gogome/pkg/engine"
 	"github.com/veandco/go-sdl2/mix"
@@ -80,48 +81,57 @@ func main() {
 
 	entities := []engine.Entity{player, enemy}
 
-	for {
-		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
-			case *sdl.QuitEvent:
-				os.Exit(0)
+	// Set tick rate to 8 FPS
+	// 8 looks more natural for our 8 bit style animations
+	tick := time.NewTicker(time.Second / 8)
 
-			case *sdl.MouseButtonEvent:
-				x, y, state := sdl.GetMouseState()
-				if state == 1 {
-					coords := fmt.Sprintf("(%d, %d)", x, y)
-					text := engine.NewText(renderer, coords, float64(x), float64(y))
-					entities = append(entities, text)
+	for {
+
+		// Setup a tick rate
+		select {
+		case <-tick.C:
+			for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+				switch event.(type) {
+				case *sdl.QuitEvent:
+					os.Exit(0)
+
+				case *sdl.MouseButtonEvent:
+					x, y, state := sdl.GetMouseState()
+					if state == 1 {
+						coords := fmt.Sprintf("(%d, %d)", x, y)
+						text := engine.NewText(renderer, coords, float64(x), float64(y))
+						entities = append(entities, text)
+					}
+				}
+				// Setup ESC to exit keybinding
+				keys := sdl.GetKeyboardState()
+				if keys[sdl.SCANCODE_ESCAPE] == 1 {
+					os.Exit(0)
 				}
 			}
-			// Setup ESC to exit keybinding
-			keys := sdl.GetKeyboardState()
-			if keys[sdl.SCANCODE_ESCAPE] == 1 {
-				os.Exit(0)
-			}
-		}
 
-		// Render tilemap
-		for x := 0; x < winW; x += 16 {
-			for y := 0; y < winH; y += 16 {
-				tile := level.TileMap[x][y]
-				width := tile.X1 - tile.X0
-				height := tile.Y1 - tile.Y0
-				// Render the background of the level
-				renderer.Copy(
-					level.Texture,
-					&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
-					&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
-				)
-				// gfx.LineRGBA(renderer, 0, 0, int32(x), int32(y), 100, 0, 0, 100)
+			// Render tilemap
+			for x := 0; x < winW; x += 16 {
+				for y := 0; y < winH; y += 16 {
+					tile := level.TileMap[x][y]
+					width := tile.X1 - tile.X0
+					height := tile.Y1 - tile.Y0
+					// Render the background of the level
+					renderer.Copy(
+						level.Texture,
+						&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
+						&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
+					)
+					// gfx.LineRGBA(renderer, 0, 0, int32(x), int32(y), 100, 0, 0, 100)
+				}
 			}
-		}
-		for _, e := range entities {
-			e.Draw()
-			e.Update()
-		}
+			for _, e := range entities {
+				e.Draw()
+				e.Update()
+			}
 
-		renderer.Present()
+			renderer.Present()
+		}
 	}
 }
 
