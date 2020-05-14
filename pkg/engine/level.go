@@ -5,6 +5,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+// Level provides us a way to scroll and update the level
 type Level struct {
 	// BGFile is the filepath to the background
 	BGFile  string
@@ -13,6 +14,11 @@ type Level struct {
 	// TileMap is a matrix representing the map
 	// TileMap[x][y]
 	TileMap map[int]map[int]Tile
+	// Current level's coordinates
+	X, Y int
+	// Size coords to stop scrolling approriately
+	XSize int
+	YSize int
 }
 
 // Tile represents a tile in a tilemap. This might be a 16x16 sprite or a 16x128 tile.
@@ -39,4 +45,42 @@ func NewLevel(filepath string, renderer *sdl.Renderer) (*Level, error) {
 		Texture: bgTexture,
 		Sounds:  make(map[string][]*mix.Chunk),
 	}, nil
+}
+
+// Update watches keybindings and scrolls as necessary
+func (l *Level) Update() {
+	keys := sdl.GetKeyboardState()
+
+	// UP
+	if keys[sdl.SCANCODE_W] == 1 {
+		if l.Y >= 0 {
+			l.Y -= 16
+		} else {
+			l.Y = 0
+		}
+	}
+	// DOWN
+	if keys[sdl.SCANCODE_S] == 1 {
+		if l.Y <= l.YSize {
+			l.Y += 16
+		} else {
+			l.Y = l.YSize
+		}
+	}
+	// LEFT
+	if keys[sdl.SCANCODE_A] == 1 {
+		if l.X >= 0 {
+			l.X -= 16
+		} else {
+			l.X = 0
+		}
+	}
+	// RIGHT
+	if keys[sdl.SCANCODE_D] == 1 {
+		if l.X <= l.XSize {
+			l.X += 16
+		} else {
+			l.X = l.XSize
+		}
+	}
 }

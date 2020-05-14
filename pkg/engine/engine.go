@@ -9,10 +9,16 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 )
 
+var (
+	winW = 800
+	winH = 600
+)
+
 // Engine holds all of the assets necessary to run a 2D engine
 type Engine struct {
 	Fonts    []*ttf.Font
 	Entities *sdl.Surface
+	Renderer *sdl.Renderer
 }
 
 // NewEngine creates and instanciates our engine
@@ -29,7 +35,6 @@ func (e *Engine) Init() {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		checkErr(err)
 	}
-	defer sdl.Quit()
 
 	if err := ttf.Init(); err != nil {
 		checkErr(err)
@@ -39,6 +44,13 @@ func (e *Engine) Init() {
 	checkErr(err)
 
 	e.Fonts = append(e.Fonts, font)
+}
+
+// Quit cleans up the engine's resources
+func (e *Engine) Quit() {
+	e.Renderer.Destroy()
+	e.Window.Destroy()
+	sdl.Quit()
 }
 
 // AddFont provides a helper to variadically add fonts to the engine

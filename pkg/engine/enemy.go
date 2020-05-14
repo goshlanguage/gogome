@@ -17,7 +17,7 @@ type Enemy struct {
 	spriteXPos, spriteYPos int32
 	//the texture object for the enemy
 	texture *sdl.Texture
-	// The x and y coordiates for the enemy sprite
+	// The x and y coordiates for the enemy on a tileMap
 	x, y float64
 }
 

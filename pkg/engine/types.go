@@ -13,6 +13,7 @@ type Text struct {
 	x, y     float64
 }
 
+// NewText is a helper factory for Text on screen
 func NewText(renderer *sdl.Renderer, text string, x float64, y float64) *Text {
 	font, err := ttf.OpenFont("fonts/monogram.ttf", 64)
 	checkErr(err)
@@ -28,9 +29,9 @@ func NewText(renderer *sdl.Renderer, text string, x float64, y float64) *Text {
 // Draw for Text requires creating the surface, then copying the surface object onto a rectangle,
 //   then rendering that rectangle to the screen
 func (t *Text) Draw() {
-	surface, err := t.font.RenderUTF8Solid(t.text, sdl.Color{255, 255, 255, 255})
+	surface, err := t.font.RenderUTF8Solid(t.text, sdl.Color{R: 255, G: 255, B: 255, A: 255})
 	checkErr(err)
-	box := sdl.Rect{int32(t.x), int32(t.y), surface.W, surface.H}
+	box := sdl.Rect{X: int32(t.x), Y: int32(t.y), W: surface.W, H: surface.H}
 	var texture *sdl.Texture
 	if texture, err = t.renderer.CreateTextureFromSurface(surface); err != nil {
 		panic(err)

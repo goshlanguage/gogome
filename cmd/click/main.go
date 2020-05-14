@@ -27,16 +27,19 @@ func main() {
 		"GoGnome",
 		sdl.WINDOWPOS_UNDEFINED,
 		sdl.WINDOWPOS_UNDEFINED,
-		winW,
-		winH,
+		int32(winW),
+		int32(winH),
 		sdl.WINDOW_OPENGL,
 	)
 	checkErr(err)
-	defer window.Destroy()
-
+	window
 	window.UpdateSurface()
 
-	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	renderer, err := sdl.CreateRenderer(e.Window, -1, sdl.RENDERER_ACCELERATED)
+	checkErr(err)
+	e.Renderer = renderer
+
+	renderer, err := sdl.CreateRenderer(e.Window, -1, sdl.RENDERER_ACCELERATED)
 	checkErr(err)
 	defer renderer.Destroy()
 
@@ -50,14 +53,20 @@ func main() {
 	grass2 := engine.Tile{X0: 272, X1: 303, Y0: 464, Y1: 495}
 	mapping := map[int]map[int]engine.Tile{}
 	// Generate a plain grass map
-	for x := 0; x < winW; x++ {
+	for x := 0; x < (winW * 10); x += 16 {
 		mapping[x] = make(map[int]engine.Tile)
-		for y := 0; y < winH; y++ {
+		for y := 0; y < winH; y += 16 {
 			mapping[x][y] = grass
 			if y > (winH - 64) {
 				mapping[x][y] = grass2
 			}
 		}
+	}
+	// Place some stuff around to see if we're rendering the map right
+	// TODO delete
+	for x := 1280; x < 1600; x++ {
+		mapping[x] = make(map[int]engine.Tile)
+		mapping[x][320] = grass2
 	}
 	level.TileMap = mapping
 
@@ -70,10 +79,7 @@ func main() {
 	chunk, err := engine.QueueWAV("sfx/streets.wav")
 	checkErr(err)
 	level.Sounds["background"] = append(level.Sounds["background"], chunk)
-	// e.PlayWAV(level.Sounds["background"][0])
-
-	renderer.SetDrawColor(255, 255, 255, 255)
-	renderer.Clear()
+	e.PlayWAV(level.Sounds["background"][0])
 
 	// setup a dummy enemy for demo
 	enemy, err := engine.NewEnemy(384, 150, renderer)
@@ -83,10 +89,10 @@ func main() {
 
 	// Set tick rate to 8 FPS
 	// 8 looks more natural for our 8 bit style animations
-	tick := time.NewTicker(time.Second / 8)
+	tick := time.NewTicker(time.Second / 16)
 
 	for {
-
+		renderer.Clear()
 		// Setup a tick rate
 		select {
 		case <-tick.C:
@@ -95,13 +101,16 @@ func main() {
 				case *sdl.QuitEvent:
 					os.Exit(0)
 
-				case *sdl.MouseButtonEvent:
-					x, y, state := sdl.GetMouseState()
-					if state == 1 {
-						coords := fmt.Sprintf("(%d, %d)", x, y)
-						text := engine.NewText(renderer, coords, float64(x), float64(y))
-						entities = append(entities, text)
-					}
+					// Mouse Event sample
+					/*
+						case *sdl.MouseButtonEvent:
+							x, y, state := sdl.GetMouseState()
+							if state == 1 {
+								coords := fmt.Sprintf("(%d, %d)", x, y)
+								text := engine.NewText(renderer, coords, float64(x), float64(y))
+								entities = append(entities, text)
+							}
+					*/
 				}
 				// Setup ESC to exit keybinding
 				keys := sdl.GetKeyboardState()
@@ -110,10 +119,10 @@ func main() {
 				}
 			}
 
-			// Render tilemap
+			// Render level to window
 			for x := 0; x < winW; x += 16 {
 				for y := 0; y < winH; y += 16 {
-					tile := level.TileMap[x][y]
+					tile := level.TileMap[level.X][level.Y]
 					width := tile.X1 - tile.X0
 					height := tile.Y1 - tile.Y0
 					// Render the background of the level
@@ -125,11 +134,12 @@ func main() {
 					// gfx.LineRGBA(renderer, 0, 0, int32(x), int32(y), 100, 0, 0, 100)
 				}
 			}
+			level.Update()
+			fmt.Printf("X: %d, Y: %d\n", level.X, level.Y)
 			for _, e := range entities {
 				e.Draw()
 				e.Update()
 			}
-
 			renderer.Present()
 		}
 	}
