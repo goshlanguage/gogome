@@ -51,9 +51,11 @@ func main() {
 	grass := engine.Tile{X0: 0, X1: 16, Y0: 0, Y1: 16}
 	grass2 := engine.Tile{X0: 272, X1: 303, Y0: 464, Y1: 495}
 	mapping := map[int]map[int]engine.Tile{}
-	// Generate a plain grass map
+	entityMap := map[int]map[int]engine.Entity{}
+	// Bootstrap TileMap for the background, and entity map to render entities on top of
 	for x := 0; x < (winW * 10); x += 16 {
 		mapping[x] = make(map[int]engine.Tile)
+		entityMap[x] = make(map[int]engine.Entity)
 		for y := 0; y < (winH * 10); y += 16 {
 			mapping[x][y] = grass
 			// half the time, give us different grass
@@ -65,9 +67,14 @@ func main() {
 	level.XSize = winW * 10
 	level.YSize = winH * 10
 	level.TileMap = mapping
+	level.EntityMap = entityMap
 
-	fmt.Println("MAP: %s", level.TileMap)
+	// setup a dummy enemy
+	enemy, err := engine.NewEnemy(384, 150, renderer)
+	level.EntityMap[0] = map[int]engine.Entity{}
+	level.EntityMap[0][0] = enemy
 
+	// Setup audio
 	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
 		checkErr(err)
 	}
@@ -79,11 +86,7 @@ func main() {
 	level.Sounds["background"] = append(level.Sounds["background"], chunk)
 	//e.PlayWAV(level.Sounds["background"][0])
 
-	// setup a dummy enemy for demo
-	enemy, err := engine.NewEnemy(384, 150, renderer)
-	checkErr(err)
-
-	entities := []engine.Entity{player, enemy}
+	entities := []engine.Entity{player}
 
 	// Set tick rate to 8 FPS
 	// 8 looks more natural for our 8 bit style animations
@@ -140,6 +143,12 @@ func main() {
 						&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
 						&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
 					)
+					if level.EntityMap[level.X+x][level.Y+y] != nil {
+						entity := level.EntityMap[level.X][level.Y]
+						entity.SetX(float64(level.X + x))
+						entity.SetY(float64(level.Y + y))
+						entity.Draw()
+					}
 					if grid {
 						// draw vertical grid lines
 						gfx.LineRGBA(renderer, int32(x), 0, int32(x), winH, 100, 0, 0, 100)

@@ -9,45 +9,45 @@ const speed = 0.75
 
 // Player holds all things relevant to make the Player model self sufficient.
 type Player struct {
-	// Frame tracks what frame of the player animation we're on
-	frame      int32
-	frameLimit int32
-	// store the renderer pointer so we can render through a method
-	renderer *sdl.Renderer
-	// sprites are chunked into 16x32 frames
-	// spriteXPos and spriteYPos is a frame reference eg: [0, 1, 2, 3] for 4 frames of animation
-	spriteXPos, spriteYPos int32
-	// texture holds the bitmap used to render the Player
-	texture *sdl.Texture
+	// Frame tracks what Frame of the player animation we're on
+	Frame      int32
+	FrameLimit int32
+	// store the Renderer pointer so we can render through a method
+	Renderer *sdl.Renderer
+	// Sprites are chunked into 16x32 Frames
+	// SpriteXPos and SpriteYPos is a Frame reference eg: [0, 1, 2, 3] for 4 Frames of animation
+	SpriteXPos, SpriteYPos int32
+	// Texture holds the bitmap used to render the Player
+	Texture *sdl.Texture
 	// x and y are the x and y coordinates for the Player
-	x, y float64
+	X, Y float64
 }
 
 // NewPlayer is a Player factory that sets it's defaults and returns it
-func NewPlayer(renderer *sdl.Renderer) (*Player, error) {
+func NewPlayer(Renderer *sdl.Renderer) (*Player, error) {
 
-	texture, err := img.LoadTexture(renderer, "sprites/character.png")
+	Texture, err := img.LoadTexture(Renderer, "Sprites/character.png")
 	checkErr(err)
 
 	return &Player{
-		frame:      0,
-		frameLimit: 3,
-		renderer:   renderer,
-		spriteXPos: 1,
-		spriteYPos: 1,
-		texture:    texture,
-		// Place the user in the middle of the screen, assuming 800x600 minus half the sprite size
-		x: 396.0,
-		y: 272.0,
+		Frame:      0,
+		FrameLimit: 3,
+		Renderer:   Renderer,
+		SpriteXPos: 1,
+		SpriteYPos: 1,
+		Texture:    Texture,
+		// Place the user in the middle of the screen, assuming 800x600 minus half the Sprite size
+		X: 396.0,
+		Y: 272.0,
 	}, nil
 }
 
-// Draw render's the Player sprite to the screen
+// Draw render's the Player Sprite to the screen
 func (player *Player) Draw() {
-	player.renderer.Copy(
-		player.texture,
-		&sdl.Rect{X: player.spriteXPos * 16, Y: player.spriteYPos * 32, W: 16, H: 32},
-		&sdl.Rect{X: int32(player.x), Y: int32(player.y), W: 32, H: 64},
+	player.Renderer.Copy(
+		player.Texture,
+		&sdl.Rect{X: player.SpriteXPos * 16, Y: player.SpriteYPos * 32, W: 16, H: 32},
+		&sdl.Rect{X: int32(player.X), Y: int32(player.Y), W: 32, H: 64},
 	)
 }
 
@@ -76,66 +76,76 @@ func (player *Player) Update() {
 		moving = true
 	}
 
-	// If we've stopped moving, reset our animation to our still frame
+	// If we've stopped moving, reset our animation to our still Frame
 	if !moving {
-		player.frame = 0
+		player.Frame = 0
 	}
 
 }
 
 func (player *Player) move(x float64, y float64) {
 	// Don't let player move beyond bounds, but DO update their animation
-	if player.x >= 392 && player.x <= 400 {
-		player.x += x * speed
+	if player.X >= 392 && player.X <= 400 {
+		player.X += x * speed
 	} else {
-		if player.x < 392 {
-			player.x = 392
+		if player.X < 392 {
+			player.X = 392
 		}
-		if player.x > 400 {
-			player.x = 400
+		if player.X > 400 {
+			player.X = 400
 		}
 	}
-	if player.y >= 268 && player.y <= 276 {
-		player.y += y * speed
+	if player.Y >= 268 && player.Y <= 276 {
+		player.Y += y * speed
 	} else {
-		if player.y < 268 {
-			player.y = 268
+		if player.Y < 268 {
+			player.Y = 268
 		}
-		if player.y > 276 {
-			player.y = 276
+		if player.Y > 276 {
+			player.Y = 276
 		}
 	}
-	player.frame++
-	// If we've iterated past our number of frames, reset to 0
-	if player.frame > player.frameLimit {
-		player.frame = 0
+	player.Frame++
+	// If we've iterated past our number of Frames, reset to 0
+	if player.Frame > player.FrameLimit {
+		player.Frame = 0
 	}
 
-	// If x is the coordinate that we're changing, set the frame animation.
-	//   Our original player sprite has it's right and left facing sprites in the
+	// If x is the coordinate that we're changing, set the Frame animation.
+	//   Our original player Sprite has it's right and left facing Sprites in the
 	//   1st and 3rd Y positions, so use those respectively
 	//   Repeat this logic for movements along the Y axis, setting their Y positions in the
-	//   sprite sheet.
+	//   Sprite sheet.
 	if x != 0 {
 		if x > 0 {
-			player.spriteYPos = 1
+			player.SpriteYPos = 1
 		} else {
-			player.spriteYPos = 3
+			player.SpriteYPos = 3
 		}
-		player.spriteXPos++
-		if player.spriteXPos > player.frameLimit {
-			player.spriteXPos = 0
+		player.SpriteXPos++
+		if player.SpriteXPos > player.FrameLimit {
+			player.SpriteXPos = 0
 		}
 	}
 	if y != 0 {
 		if y > 0 {
-			player.spriteYPos = 0
+			player.SpriteYPos = 0
 		} else {
-			player.spriteYPos = 2
+			player.SpriteYPos = 2
 		}
-		player.spriteXPos++
-		if player.spriteXPos > player.frameLimit {
-			player.spriteXPos = 0
+		player.SpriteXPos++
+		if player.SpriteXPos > player.FrameLimit {
+			player.SpriteXPos = 0
 		}
 	}
+}
+
+// SetX sets the player X coordinate
+func (player *Player) SetX(x float64) {
+	player.X = x
+}
+
+// SetY sets the player Y coordinate
+func (player *Player) SetY(y float64) {
+	player.Y = y
 }

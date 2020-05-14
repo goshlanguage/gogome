@@ -8,9 +8,11 @@ import (
 // Level provides us a way to scroll and update the level
 type Level struct {
 	// BGFile is the filepath to the background
-	BGFile  string
-	Sounds  map[string][]*mix.Chunk
-	Texture *sdl.Texture
+	BGFile string
+	// EntityMap entities and draws them on the map when they're in focus
+	EntityMap map[int]map[int]Entity
+	Sounds    map[string][]*mix.Chunk
+	Texture   *sdl.Texture
 	// TileMap is a matrix representing the map
 	// TileMap[x][y]
 	TileMap map[int]map[int]Tile
