@@ -53,7 +53,7 @@ func (l *Level) Update() {
 
 	// UP
 	if keys[sdl.SCANCODE_W] == 1 {
-		if l.Y >= 0 {
+		if l.Y > 0 {
 			l.Y -= 16
 		} else {
 			l.Y = 0
@@ -61,7 +61,7 @@ func (l *Level) Update() {
 	}
 	// DOWN
 	if keys[sdl.SCANCODE_S] == 1 {
-		if l.Y <= l.YSize {
+		if l.Y < l.YSize {
 			l.Y += 16
 		} else {
 			l.Y = l.YSize
@@ -69,7 +69,7 @@ func (l *Level) Update() {
 	}
 	// LEFT
 	if keys[sdl.SCANCODE_A] == 1 {
-		if l.X >= 0 {
+		if l.X > 0 {
 			l.X -= 16
 		} else {
 			l.X = 0
@@ -77,7 +77,7 @@ func (l *Level) Update() {
 	}
 	// RIGHT
 	if keys[sdl.SCANCODE_D] == 1 {
-		if l.X <= l.XSize {
+		if l.X < l.XSize {
 			l.X += 16
 		} else {
 			l.X = l.XSize

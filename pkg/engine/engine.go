@@ -49,7 +49,6 @@ func (e *Engine) Init() {
 // Quit cleans up the engine's resources
 func (e *Engine) Quit() {
 	e.Renderer.Destroy()
-	e.Window.Destroy()
 	sdl.Quit()
 }
 
