@@ -14,7 +14,9 @@ type Player struct {
 	FrameLimit int32
 	// store the Renderer pointer so we can render through a method
 	Renderer *sdl.Renderer
-	// Sprites are chunked into 16x32 Frames
+	// size x and y pertain to what the standard size of the enemy is
+	SizeX, SizeY int32
+	// The player sprites are chunked into 16x32 Frames
 	// SpriteXPos and SpriteYPos is a Frame reference eg: [0, 1, 2, 3] for 4 Frames of animation
 	SpriteXPos, SpriteYPos int32
 	// Texture holds the bitmap used to render the Player
@@ -33,6 +35,8 @@ func NewPlayer(Renderer *sdl.Renderer) (*Player, error) {
 		Frame:      0,
 		FrameLimit: 3,
 		Renderer:   Renderer,
+		SizeX:      16,
+		SizeY:      32,
 		SpriteXPos: 1,
 		SpriteYPos: 1,
 		Texture:    Texture,
@@ -148,4 +152,9 @@ func (player *Player) SetX(x float64) {
 // SetY sets the player Y coordinate
 func (player *Player) SetY(y float64) {
 	player.Y = y
+}
+
+// Size returns x and y values of the sprite's size
+func (player *Player) Size() (int32, int32) {
+	return player.SizeX, player.SizeY
 }

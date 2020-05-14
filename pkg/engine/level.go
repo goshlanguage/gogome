@@ -11,8 +11,10 @@ type Level struct {
 	BGFile string
 	// EntityMap entities and draws them on the map when they're in focus
 	EntityMap map[int]map[int]Entity
-	Sounds    map[string][]*mix.Chunk
-	Texture   *sdl.Texture
+	// represents how many pixels we scroll per cycle. default 16
+	ScrollSpeed int
+	Sounds      map[string][]*mix.Chunk
+	Texture     *sdl.Texture
 	// TileMap is a matrix representing the map
 	// TileMap[x][y]
 	TileMap map[int]map[int]Tile
@@ -25,10 +27,11 @@ type Level struct {
 
 // Tile represents a tile in a tilemap. This might be a 16x16 sprite or a 16x128 tile.
 type Tile struct {
-	X0 int32
-	X1 int32
-	Y0 int32
-	Y1 int32
+	Name string
+	X0   int32
+	X1   int32
+	Y0   int32
+	Y1   int32
 }
 
 // NewLevel takes in the filepath of a level's background, and a renderer
@@ -43,9 +46,10 @@ func NewLevel(filepath string, renderer *sdl.Renderer) (*Level, error) {
 		return &Level{}, err
 	}
 	return &Level{
-		BGFile:  filepath,
-		Texture: bgTexture,
-		Sounds:  make(map[string][]*mix.Chunk),
+		BGFile:      filepath,
+		Texture:     bgTexture,
+		ScrollSpeed: 16,
+		Sounds:      make(map[string][]*mix.Chunk),
 	}, nil
 }
 
@@ -56,7 +60,7 @@ func (l *Level) Update() {
 	// UP
 	if keys[sdl.SCANCODE_W] == 1 {
 		if l.Y > 0 {
-			l.Y -= 16
+			l.Y -= l.ScrollSpeed
 		} else {
 			l.Y = 0
 		}
@@ -64,7 +68,7 @@ func (l *Level) Update() {
 	// DOWN
 	if keys[sdl.SCANCODE_S] == 1 {
 		if l.Y < l.YSize {
-			l.Y += 16
+			l.Y += l.ScrollSpeed
 		} else {
 			l.Y = l.YSize
 		}
@@ -72,7 +76,7 @@ func (l *Level) Update() {
 	// LEFT
 	if keys[sdl.SCANCODE_A] == 1 {
 		if l.X > 0 {
-			l.X -= 16
+			l.X -= l.ScrollSpeed
 		} else {
 			l.X = 0
 		}
@@ -80,7 +84,7 @@ func (l *Level) Update() {
 	// RIGHT
 	if keys[sdl.SCANCODE_D] == 1 {
 		if l.X < l.XSize {
-			l.X += 16
+			l.X += l.ScrollSpeed
 		} else {
 			l.X = l.XSize
 		}

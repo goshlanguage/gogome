@@ -23,7 +23,7 @@ type Enemy struct {
 }
 
 // NewEnemy constructs a basic terminal object
-func NewEnemy(x float64, y float64, renderer *sdl.Renderer) (*Enemy, error) {
+func NewEnemy(renderer *sdl.Renderer) (*Enemy, error) {
 	img, err := sdl.LoadBMP("sprites/terminal.bmp")
 	if err != nil {
 		return &Enemy{}, err
@@ -40,8 +40,8 @@ func NewEnemy(x float64, y float64, renderer *sdl.Renderer) (*Enemy, error) {
 		SizeX:      32,
 		SizeY:      32,
 		Texture:    texture,
-		X:          x,
-		Y:          y,
+		X:          -100,
+		Y:          -100,
 	}, nil
 }
 
@@ -83,4 +83,9 @@ func (enemy *Enemy) SetX(x float64) {
 // SetY sets the enemy Y coordinate
 func (enemy *Enemy) SetY(y float64) {
 	enemy.Y = y
+}
+
+// Size returns the enemy size
+func (enemy *Enemy) Size() (int32, int32) {
+	return enemy.SizeX, enemy.SizeY
 }
