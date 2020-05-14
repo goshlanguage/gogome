@@ -72,7 +72,7 @@ func main() {
 	// setup a dummy enemy
 	enemy, err := engine.NewEnemy(384, 150, renderer)
 	level.EntityMap[0] = map[int]engine.Entity{}
-	level.EntityMap[0][0] = enemy
+	level.EntityMap[300][100] = enemy
 
 	// Setup audio
 	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
