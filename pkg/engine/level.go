@@ -109,9 +109,9 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 			// This will need to be refactored to support dynamically sized tiles
 			if x == 0 && level.X%16 != 0 {
 				xOffset := level.X % 16
-				tile := level.TileMap[level.X-xOffset][level.Y+y]
 
-				width := xOffset
+				tile := level.TileMap[level.X-xOffset][level.Y+y]
+				width := int32(xOffset)
 				height := tile.Y1 - tile.Y0
 
 				// Render the background of the level
@@ -121,7 +121,7 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 					&sdl.Rect{X: int32(x), Y: int32(y), W: width * 2, H: height * 2},
 				)
 				if y < 200 {
-					fmt.Printf("Rendering %d,%d at level %d,%d from pixel %d,%d\t ", x, y, level.X, level.Y)
+					fmt.Printf("Rendering %d,%d at level %d,%d from pixel %d,%d\t ", x, y, level.X, level.Y, tile.X0+int32(xOffset), tile.Y0)
 					fmt.Printf("Using TileMap[%d][%d]: %s\t", level.X-xOffset, level.Y+y, level.TileMap[level.X-xOffset][level.Y+y].Name)
 					fmt.Printf("Placed at %d,%d w: %d h: %d\n", x, y, width, height)
 				}
