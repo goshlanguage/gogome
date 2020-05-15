@@ -1,17 +1,20 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-const speed = 0.75
+var speed = 4
 
 // Player holds all things relevant to make the Player model self sufficient.
 type Player struct {
 	// Frame tracks what Frame of the player animation we're on
-	Frame      int32
-	FrameLimit int32
+	Frame          int32
+	FrameLimit     int32
+	LevelX, LevelY int
 	// store the Renderer pointer so we can render through a method
 	Renderer *sdl.Renderer
 	// size x and y pertain to what the standard size of the enemy is
@@ -47,16 +50,23 @@ func NewPlayer(Renderer *sdl.Renderer) (*Player, error) {
 }
 
 // Draw render's the Player Sprite to the screen
-func (player *Player) Draw() {
-	player.Renderer.Copy(
+func (player *Player) Draw(renderer *sdl.Renderer) {
+	renderer.Copy(
 		player.Texture,
 		&sdl.Rect{X: player.SpriteXPos * 16, Y: player.SpriteYPos * 32, W: 16, H: 32},
 		&sdl.Rect{X: int32(player.X), Y: int32(player.Y), W: 32, H: 64},
 	)
 }
 
+// GetLevelCoords satisfies the entity interface
+func (player *Player) GetLevelCoords() (int, int) {
+	return player.LevelX, player.LevelY
+}
+
 // Update checks for keystrokes and calls the appropriate method based on the user input
-func (player *Player) Update() {
+func (player *Player) Update(levelX int, levelY int) {
+	player.LevelX = levelX
+	player.LevelY = levelY
 	keys := sdl.GetKeyboardState()
 	moving := false
 	// UP
@@ -80,7 +90,19 @@ func (player *Player) Update() {
 		moving = true
 	}
 
+	if keys[sdl.SCANCODE_LSHIFT] == 1 {
+		speed = 8
+		fmt.Printf("Run mode engaged, speed: %d\t", speed)
+	} else {
+		speed = 4
+	}
+
+	if moving {
+		fmt.Printf("player level coords: %d,%d\n", player.LevelX, player.LevelY)
+	}
+
 	// If we've stopped moving, reset our animation to our still Frame
+	// TODO - refactor this for standing animations
 	if !moving {
 		player.Frame = 0
 	}
@@ -89,24 +111,24 @@ func (player *Player) Update() {
 
 func (player *Player) move(x float64, y float64) {
 	// Don't let player move beyond bounds, but DO update their animation
-	if player.X >= 392 && player.X <= 400 {
-		player.X += x * speed
+	if player.X >= 0 && player.X <= float64(winW)-64 {
+		player.X += x * float64(speed)
 	} else {
-		if player.X < 392 {
-			player.X = 392
+		if player.X <= 0 {
+			player.X = 0
 		}
-		if player.X > 400 {
-			player.X = 400
+		if player.X >= float64(winW)-64 {
+			player.X = float64(winW) - 64
 		}
 	}
-	if player.Y >= 268 && player.Y <= 276 {
-		player.Y += y * speed
+	if player.Y >= 0 && player.Y <= float64(winH) {
+		player.Y += y * float64(speed)
 	} else {
-		if player.Y < 268 {
-			player.Y = 268
+		if player.Y <= 0 {
+			player.Y = 0
 		}
-		if player.Y > 276 {
-			player.Y = 276
+		if player.Y >= float64(winH)-64 {
+			player.Y = float64(winH) - 64
 		}
 	}
 	player.Frame++

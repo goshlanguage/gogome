@@ -1,6 +1,11 @@
 package engine
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"fmt"
+	"os"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 // Enemy holds all things necessary for the Enemy to make their moves
 type Enemy struct {
@@ -9,8 +14,12 @@ type Enemy struct {
 	FrameLimit int32
 	// Enemy health out of 1.0 representing 100%
 	Health float64
-	// renderer allows us to draw this object to screen
-	Renderer *sdl.Renderer
+	//LevelX, LevelY are used to track where on the level map the enemy is
+	LevelX, LevelY int
+	// This primitive logger exists so we can print out any helpful debug information
+	Log string
+	// Name tracks enemy objects
+	Name string
 	// size x and y pertain to what the standard size of the enemy is
 	SizeX, SizeY int32
 	// SpriteXPos and SpriteYPos is a Frame reference eg: [0, 1, 2, 3] for 4 Frames of animation
@@ -22,8 +31,10 @@ type Enemy struct {
 	X, Y float64
 }
 
+var debug = os.Getenv("HMDEBUG") == ""
+
 // NewEnemy constructs a basic terminal object
-func NewEnemy(renderer *sdl.Renderer) (*Enemy, error) {
+func NewEnemy(name string, renderer *sdl.Renderer) (*Enemy, error) {
 	img, err := sdl.LoadBMP("sprites/terminal.bmp")
 	if err != nil {
 		return &Enemy{}, err
@@ -36,13 +47,17 @@ func NewEnemy(renderer *sdl.Renderer) (*Enemy, error) {
 	return &Enemy{
 		FrameLimit: 1,
 		Health:     1.0,
-		Renderer:   renderer,
+		Name:       name,
 		SizeX:      32,
 		SizeY:      32,
 		Texture:    texture,
-		X:          -100,
-		Y:          -100,
 	}, nil
+}
+
+// GetLevelCoords returns the X and Y coordinates on the Level where
+//    the enemy is supposed to be.
+func (enemy *Enemy) GetLevelCoords() (x int, y int) {
+	return enemy.LevelX, enemy.LevelY
 }
 
 // SetCoords helps when rendering the entity map to set where to Draw the enemy on the screen
@@ -53,16 +68,19 @@ func (enemy *Enemy) SetCoords(x float64, y float64) {
 }
 
 // Draw renders the enemy to the screen
-func (enemy *Enemy) Draw() {
-	enemy.Renderer.Copy(
+func (enemy *Enemy) Draw(renderer *sdl.Renderer) {
+	if debug {
+		fmt.Sprintf("drawing enemy %s to", enemy.Name, enemy.X, enemy.Y)
+	}
+	renderer.Copy(
 		enemy.Texture,
 		&sdl.Rect{X: enemy.SpriteXPos * enemy.SizeX, Y: enemy.SpriteYPos * enemy.SizeY, W: 32, H: 32},
 		&sdl.Rect{X: int32(enemy.X), Y: int32(enemy.Y), W: 32, H: 32},
 	)
 }
 
-// Update advances the enemy animation
-func (enemy *Enemy) Update() {
+// Update advances the enemy animation and updates x/y coords for the enemy
+func (enemy *Enemy) Update(levelX int, levelY int) {
 	enemy.Frame++
 	// If we've iterated past our number of Frames, reset to 0
 	if enemy.Frame > enemy.FrameLimit {

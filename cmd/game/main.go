@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/ryanhartje/gogome/pkg/engine"
-	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -19,13 +19,14 @@ const (
 
 var (
 	fonts = []string{"fonts/monogram.ttf"}
-	grid  = false
 	debug = false
+	log   string
 )
 
 func main() {
-	if os.Getenv("OMG") != "" {
+	if os.Getenv("HMDEBUG") != "" {
 		debug = true
+		fmt.Println("debug mode enabled")
 	}
 	e := engine.NewEngine()
 	e.Init()
@@ -70,14 +71,22 @@ func main() {
 			entityMap[x][y] = nil
 		}
 	}
+	level.CameraX = winW
+	level.CameraY = winH
 	level.XSize = winW * 10
 	level.YSize = winH * 10
 	level.TileMap = mapping
 	level.EntityMap = entityMap
 
 	// setup a dummy enemy
-	enemy, err := engine.NewEnemy(renderer)
+	enemy, err := engine.NewEnemy("computer", renderer)
 	level.EntityMap[32*16][10*16] = enemy
+	if debug {
+		enemy.Log = log
+		log += "adding enemy to entity array"
+	}
+	enemy.LevelX = 8 * 100
+	enemy.LevelY = 8 * 20
 
 	// Setup audio
 	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
@@ -91,7 +100,7 @@ func main() {
 	level.Sounds["background"] = append(level.Sounds["background"], chunk)
 	//e.PlayWAV(level.Sounds["background"][0])
 
-	entities := []engine.Entity{player}
+	entities := []engine.Entity{player, enemy}
 
 	// Set tick rate to 8 FPS
 	// 8 looks more natural for our 8 bit style animations
@@ -102,7 +111,6 @@ func main() {
 	//   during the main loop. While it is set to a tick rate, multiple messages per tick get our of hand.
 	//   log is used to log out the combined output of mainloop in debug mode.
 	var lastDebugMsg string
-	var log string
 	for {
 		renderer.Clear()
 		// Setup ESC to exit keybinding
@@ -122,6 +130,9 @@ func main() {
 					os.Exit(0)
 
 				case *sdl.KeyboardEvent:
+					if debug && t.Keysym.Scancode == sdl.SCANCODE_G && t.State == 1 {
+						level.Debug = !level.Debug
+					}
 					// If you want to explore keybinding values, you can comment this out and they will log
 					//   to your console.
 					/*
@@ -130,9 +141,6 @@ func main() {
 								log, t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 						}
 					*/
-					if t.Keysym.Scancode == sdl.SCANCODE_G && t.State == 1 {
-						grid = !grid
-					}
 
 					/*
 						case *sdl.MouseButtonEvent:
@@ -147,48 +155,17 @@ func main() {
 				}
 			}
 
-			// Render level to window tile by tile
-			for x := 0; x < winW; x += level.ScrollSpeed {
-				for y := 0; y < winH; y += level.ScrollSpeed {
-					tile := level.TileMap[level.X+x][level.Y+y]
-					width := tile.X1 - tile.X0
-					height := tile.Y1 - tile.Y0
-					// Render the background of the level
-					renderer.Copy(
-						level.Texture,
-						&sdl.Rect{X: tile.X0, Y: tile.Y0, W: width, H: height},
-						&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
-					)
-
-					if grid {
-						// draw vertical grid lines
-						gfx.LineRGBA(renderer, int32(x), 0, int32(x), winH, 100, 0, 0, 100)
-						// draw horizontal line
-						gfx.LineRGBA(renderer, 0, int32(y), winW, int32(y), 100, 0, 0, 100)
-					}
-				}
-			}
+			level.Draw(renderer)
 			level.Update()
 
-			// Render level to window tile by tile
-			for x := 0; x < winW; x += 16 {
-				for y := 0; y < winH; y += 16 {
-					if level.EntityMap[level.X+x][level.Y+y] != nil {
-						if debug {
-							log += fmt.Sprintf("level: (%d,%d)\t", level.X, level.Y)
-							log += fmt.Sprintf("enemy: %d,%d\n", level.X+x, level.Y+y)
-						}
-						entity := level.EntityMap[level.X+x][level.Y+y]
-						entity.SetX(float64(x))
-						entity.SetY(float64(y))
-						entity.Draw()
-					}
-				}
-			}
-
 			for _, e := range entities {
-				e.Draw()
-				e.Update()
+				eX, eY := e.GetLevelCoords()
+				isPlayer := reflect.TypeOf(e) == reflect.TypeOf(player)
+				inCameraView := eX >= level.X && eX < level.X+winW && eY >= level.Y && eY < level.Y+winH
+				if inCameraView || isPlayer {
+					e.Draw(renderer)
+				}
+				e.Update(level.X, level.Y)
 			}
 			renderer.Present()
 
