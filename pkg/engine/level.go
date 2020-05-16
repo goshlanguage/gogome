@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
@@ -76,7 +77,8 @@ func NewRandomizedLevel(filepath string, renderer *sdl.Renderer) (*Level, error)
 	if err != nil {
 		return &Level{}, err
 	}
-	return &Level{
+
+	level := &Level{
 		BGFile:      filepath,
 		CameraX:     640,
 		CameraY:     480,
@@ -84,7 +86,31 @@ func NewRandomizedLevel(filepath string, renderer *sdl.Renderer) (*Level, error)
 		TileSize:    32,
 		ScrollSpeed: 8,
 		Sounds:      make(map[string][]*mix.Chunk),
-	}, nil
+	}
+
+	grass := Tile{Name: "grass", X0: 0, X1: 16, Y0: 0, Y1: 16}
+	grass2 := Tile{Name: "grass2", X0: 272, X1: 303, Y0: 464, Y1: 495}
+	mapping := map[int]map[int]Tile{}
+	level.EntityMap = map[int]map[int]Entity{}
+
+	// Bootstrap TileMap for the background, and entity map to render entities on top of
+	// iterate by the x and y values of the sprite's width and height, so that you don't
+	// draw over other tiles.
+	for x := 0; x < (winW * 10); x += 32 {
+		mapping[x] = make(map[int]Tile)
+		level.EntityMap[x] = make(map[int]Entity)
+		for y := 0; y < (winH * 10); y += 32 {
+			mapping[x][y] = grass
+			// half the time, give us different grass
+			if rand.Intn(10) > 5 {
+				mapping[x][y] = grass2
+			}
+			level.EntityMap[x][y] = nil
+		}
+	}
+	level.TileMap = mapping
+
+	return level, nil
 }
 
 // Draw takes the camera viewport and renders it to the screen

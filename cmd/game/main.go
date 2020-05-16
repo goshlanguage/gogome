@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"reflect"
 	"time"
@@ -49,44 +48,23 @@ func main() {
 	player, err := engine.NewPlayer(renderer)
 	checkErr(err)
 
-	// Load in our level asset and generate a plain map
-	level, err := engine.NewLevel("sprites/overworld.bmp", renderer)
+	// Load in our level asset and generate a random map
+	level, err := engine.NewRandomizedLevel("sprites/overworld.bmp", renderer)
 	checkErr(err)
-	grass := engine.Tile{Name: "grass", X0: 0, X1: 16, Y0: 0, Y1: 16}
-	grass2 := engine.Tile{Name: "grass2", X0: 272, X1: 303, Y0: 464, Y1: 495}
-	mapping := map[int]map[int]engine.Tile{}
-	entityMap := map[int]map[int]engine.Entity{}
-	// Bootstrap TileMap for the background, and entity map to render entities on top of
-	// iterate by the x and y values of the sprite's width and height, so that you don't
-	// draw over other tiles.
-	for x := 0; x < (winW * 10); x += 16 {
-		mapping[x] = make(map[int]engine.Tile)
-		entityMap[x] = make(map[int]engine.Entity)
-		for y := 0; y < (winH * 10); y += 16 {
-			mapping[x][y] = grass
-			// half the time, give us different grass
-			if rand.Intn(10) > 5 {
-				mapping[x][y] = grass2
-			}
-			entityMap[x][y] = nil
-		}
-	}
 	level.CameraX = winW
 	level.CameraY = winH
 	level.XSize = winW * 10
 	level.YSize = winH * 10
-	level.TileMap = mapping
-	level.EntityMap = entityMap
 
 	// setup a dummy enemy
 	enemy, err := engine.NewEnemy("computer", renderer)
-	level.EntityMap[32*16][10*16] = enemy
-	if debug {
-		enemy.Log = log
-		log += "adding enemy to entity array"
-	}
 	enemy.LevelX = 8 * 100
 	enemy.LevelY = 8 * 20
+
+	if reflect.TypeOf(level.EntityMap[0]) == reflect.TypeOf(nil) {
+		panic("wtf")
+	}
+	level.EntityMap[0][0] = enemy
 
 	// Setup audio
 	if err := mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
