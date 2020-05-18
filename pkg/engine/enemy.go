@@ -70,7 +70,7 @@ func (enemy *Enemy) SetCoords(x float64, y float64) {
 // Draw renders the enemy to the screen
 func (enemy *Enemy) Draw(renderer *sdl.Renderer) {
 	if debug {
-		fmt.Sprintf("drawing enemy %s to", enemy.Name, enemy.X, enemy.Y)
+		fmt.Printf("drawing enemy %s to %v,%v\n", enemy.Name, enemy.X, enemy.Y)
 	}
 	renderer.Copy(
 		enemy.Texture,

@@ -1,5 +1,5 @@
 {
-    "powermode.enabled": true,
+    "powermode.enabled": false,
     "powermode.enableStatusBarComboCounter": true,
     "powermode.enableStatusBarComboTimer": false,
     "powermode.presets": "clippy",
