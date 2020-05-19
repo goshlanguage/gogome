@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"reflect"
 	"time"
 
 	"github.com/ryanhartje/gogome/pkg/engine"
+	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -54,7 +56,15 @@ func main() {
 			player.Y += 4
 		}
 	}
-	player.Effects = append(player.Effects, gravity)
+	bleeding := func(player *engine.Player) {
+		droplets := rand.Intn(10)
+		for i := 0; i < droplets; i++ {
+			randX := int32(player.X) + rand.Int31n(player.SizeX)
+			randY := int32(player.Y) + rand.Int31n(player.SizeY)
+			gfx.RoundedBoxColor(renderer, randX, randY, randX+4, randY+4, 1, sdl.Color{255, 0, 0, uint8(rand.Intn(255))})
+		}
+	}
+	player.Effects = []func(*engine.Player){gravity, bleeding}
 
 	// Load in our level asset and generate a random map
 	level, err := engine.NewRandomizedLevel("sprites/overworld.bmp", renderer)
