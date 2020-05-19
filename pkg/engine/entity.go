@@ -4,7 +4,7 @@ import "github.com/veandco/go-sdl2/sdl"
 
 // Entity is an interface that aides the engine in having commmon functionality
 type Entity interface {
-	Draw(*sdl.Renderer)
+	Draw(*sdl.Renderer, int, int)
 	GetLevelCoords() (int, int)
 	SetX(float64)
 	SetY(float64)

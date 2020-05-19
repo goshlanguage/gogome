@@ -11,13 +11,16 @@ var speed = 4
 
 // Player holds all things relevant to make the Player model self sufficient.
 type Player struct {
+	Debug bool
+	// Effects are a slice of funcs called at Update() in order to programatically mutate the entity
+	Effects []func(*Player)
 	// Frame tracks what Frame of the player animation we're on
 	Frame          int32
 	FrameLimit     int32
 	LevelX, LevelY int
 	// store the Renderer pointer so we can render through a method
 	Renderer *sdl.Renderer
-	// size x and y pertain to what the standard size of the enemy is
+	// size x and y pertain to what the standard size of the player is
 	SizeX, SizeY int32
 	// The player sprites are chunked into 16x32 Frames
 	// SpriteXPos and SpriteYPos is a Frame reference eg: [0, 1, 2, 3] for 4 Frames of animation
@@ -50,7 +53,7 @@ func NewPlayer(Renderer *sdl.Renderer) (*Player, error) {
 }
 
 // Draw render's the Player Sprite to the screen
-func (player *Player) Draw(renderer *sdl.Renderer) {
+func (player *Player) Draw(renderer *sdl.Renderer, levelX int, levelY int) {
 	renderer.Copy(
 		player.Texture,
 		&sdl.Rect{X: player.SpriteXPos * 16, Y: player.SpriteYPos * 32, W: 16, H: 32},
@@ -65,8 +68,10 @@ func (player *Player) GetLevelCoords() (int, int) {
 
 // Update checks for keystrokes and calls the appropriate method based on the user input
 func (player *Player) Update(levelX int, levelY int) {
-	player.LevelX = levelX
-	player.LevelY = levelY
+	for _, effect := range player.Effects {
+		effect(player)
+	}
+
 	keys := sdl.GetKeyboardState()
 	moving := false
 	// UP
@@ -92,13 +97,18 @@ func (player *Player) Update(levelX int, levelY int) {
 
 	if keys[sdl.SCANCODE_LSHIFT] == 1 {
 		speed = 8
+
 		fmt.Printf("Run mode engaged, speed: %d\t", speed)
 	} else {
 		speed = 4
 	}
 
+	player.LevelX = levelX
+	player.LevelY = levelY
 	if moving {
-		fmt.Printf("player level coords: %d,%d\n", player.LevelX, player.LevelY)
+		if player.Debug {
+			fmt.Printf("player level coords: %d,%d\n", player.LevelX, player.LevelY)
+		}
 	}
 
 	// If we've stopped moving, reset our animation to our still Frame
@@ -110,25 +120,28 @@ func (player *Player) Update(levelX int, levelY int) {
 }
 
 func (player *Player) move(x float64, y float64) {
+	nextXStep := x * float64(speed)
+	leftBound := player.X+nextXStep < float64(speed)
+	rightBound := player.X+nextXStep > float64(winW-16)
 	// Don't let player move beyond bounds, but DO update their animation
-	if player.X >= 0 && player.X <= float64(winW)-64 {
+	if !leftBound && !rightBound {
 		player.X += x * float64(speed)
 	} else {
-		if player.X <= 0 {
-			player.X = 0
+		if leftBound {
+			player.X = float64(speed)
 		}
-		if player.X >= float64(winW)-64 {
-			player.X = float64(winW) - 64
+		if rightBound {
+			player.X = float64(winW) - float64(speed)
 		}
 	}
-	if player.Y >= 0 && player.Y <= float64(winH) {
+	if player.Y >= 0 && player.Y <= float64(winH)-32 {
 		player.Y += y * float64(speed)
 	} else {
 		if player.Y <= 0 {
 			player.Y = 0
 		}
-		if player.Y >= float64(winH)-64 {
-			player.Y = float64(winH) - 64
+		if player.Y >= float64(winH)-32 {
+			player.Y = float64(winH) - 32
 		}
 	}
 	player.Frame++

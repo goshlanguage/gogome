@@ -47,6 +47,14 @@ func main() {
 
 	player, err := engine.NewPlayer(renderer)
 	checkErr(err)
+	// create a gravity effect and assign it to the player
+	gravity := func(player *engine.Player) {
+		// keep in mind that SDL has a reversed Y coordinate system, where 0,0 is the top [left] of the screen, and winH,0 is the bottom [left] of the screen
+		if player.Y < winH-float64(player.SizeY*2) {
+			player.Y += 4
+		}
+	}
+	player.Effects = append(player.Effects, gravity)
 
 	// Load in our level asset and generate a random map
 	level, err := engine.NewRandomizedLevel("sprites/overworld.bmp", renderer)
@@ -132,7 +140,8 @@ func main() {
 
 				}
 			}
-
+			originalX := level.X
+			originalY := level.Y
 			level.Draw(renderer)
 			level.Update()
 
@@ -141,9 +150,9 @@ func main() {
 				isPlayer := reflect.TypeOf(e) == reflect.TypeOf(player)
 				inCameraView := eX >= level.X && eX < level.X+winW && eY >= level.Y && eY < level.Y+winH
 				if inCameraView || isPlayer {
-					e.Draw(renderer)
+					e.Draw(renderer, level.X, level.Y)
 				}
-				e.Update(level.X, level.Y)
+				e.Update(level.X-originalX, level.Y-originalY)
 			}
 			renderer.Present()
 

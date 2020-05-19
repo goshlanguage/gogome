@@ -68,14 +68,17 @@ func (enemy *Enemy) SetCoords(x float64, y float64) {
 }
 
 // Draw renders the enemy to the screen
-func (enemy *Enemy) Draw(renderer *sdl.Renderer) {
+func (enemy *Enemy) Draw(renderer *sdl.Renderer, levelX int, levelY int) {
+	renderX := enemy.X - float64(levelX)
+	renderY := enemy.Y - float64(levelY)
 	if debug {
-		fmt.Printf("drawing enemy %s to %v,%v\n", enemy.Name, enemy.X, enemy.Y)
+		fmt.Printf("drawing enemy %s to %v,%v\n", enemy.Name, renderX, renderY)
 	}
+
 	renderer.Copy(
 		enemy.Texture,
 		&sdl.Rect{X: enemy.SpriteXPos * enemy.SizeX, Y: enemy.SpriteYPos * enemy.SizeY, W: 32, H: 32},
-		&sdl.Rect{X: int32(enemy.X), Y: int32(enemy.Y), W: 32, H: 32},
+		&sdl.Rect{X: int32(renderX), Y: int32(renderY), W: 32, H: 32},
 	)
 }
 
