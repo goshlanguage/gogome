@@ -97,8 +97,6 @@ func (player *Player) Update(levelX int, levelY int) {
 
 	if keys[sdl.SCANCODE_LSHIFT] == 1 {
 		speed = 8
-
-		fmt.Printf("Run mode engaged, speed: %d\t", speed)
 	} else {
 		speed = 4
 	}

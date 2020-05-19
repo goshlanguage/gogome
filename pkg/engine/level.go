@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
@@ -122,14 +120,6 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 	// Render level to window tile by tile
 	for x := 0; x < level.CameraX; x += level.ScrollSpeed {
 		for y := 0; y < level.CameraY; y += level.ScrollSpeed {
-			if level.Debug {
-				if x%level.TileSize == 0 && y%level.TileSize == 0 {
-					// draw vertical grid lines
-					gfx.LineRGBA(renderer, int32(x), 0, int32(x), int32(winH), 100, 0, 0, 100)
-					// draw horizontal line
-					gfx.LineRGBA(renderer, 0, int32(y), int32(winW), int32(y), 100, 0, 0, 100)
-				}
-			}
 
 			// Here's a little experiment, if level.X > 0, let's try to draw the last tile at a negative x value and see what we get
 			if (level.X > 0 || level.Y > 0) && x == 0 && y == 0 {
@@ -150,9 +140,7 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 						&sdl.Rect{X: tile.X0 + int32(xOffset/2), Y: tile.Y0, W: int32(width), H: int32(height)},
 						&sdl.Rect{X: int32(-level.TileSize + xOffset), Y: int32(-level.TileSize + yOffset), W: int32(level.TileSize), H: int32(level.TileSize)},
 					)
-					fmt.Printf("RENDERING OFFSCREEN TILE %d,%d \t", -level.TileSize+xOffset, -level.TileSize+yOffset)
 				}
-				fmt.Printf("\n")
 			}
 
 			// Here is the information we need to know where to render all tiles
@@ -161,18 +149,13 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 
 			tileX := level.X + x
 			tileY := level.Y + y
-			if x == 0 && y == 0 && (level.Y%level.TileSize != 0 && level.X%level.TileSize != 0) {
-				fmt.Printf("Tile XY %d,%d\n", tileX, tileY)
-			}
+
 			if x == 0 && level.X%level.TileSize != 0 {
 				xOffset = level.X % level.TileSize
 				tileX = level.X - xOffset
 			} else if y == 0 && level.Y%level.TileSize != 0 {
 				yOffset = level.Y % level.TileSize
 				tileY = level.Y - yOffset
-			}
-			if x == 0 && y == 0 && (level.Y%level.TileSize != 0 && level.X%level.TileSize != 0) {
-				fmt.Printf("Tile XY %d,%d\n", tileX, tileY)
 			}
 
 			tiles := level.TileMap[tileX][tileY]
@@ -189,6 +172,15 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 				)
 			}
 
+		}
+	}
+
+	// Render a grid to the screen if debug is on
+	if level.Debug {
+		// Render a grid. Draw lines from 0 to the width/height of the screen along the X and Y axis, incrementing by our tilesize
+		for i := 0; i < winW; i += level.TileSize {
+			gfx.LineRGBA(renderer, int32(0), int32(i), int32(winW), int32(i), 100, 0, 0, 100)
+			gfx.LineRGBA(renderer, int32(i), int32(0), int32(i), int32(winH), 100, 0, 0, 100)
 		}
 	}
 }
