@@ -32,9 +32,8 @@ type Player struct {
 }
 
 // NewPlayer is a Player factory that sets it's defaults and returns it
-func NewPlayer(Renderer *sdl.Renderer) (*Player, error) {
-
-	Texture, err := img.LoadTexture(Renderer, "Sprites/character.png")
+func NewPlayer(Renderer *sdl.Renderer, spritepath string) (*Player, error) {
+	Texture, err := img.LoadTexture(Renderer, spritepath)
 	checkErr(err)
 
 	return &Player{
@@ -76,22 +75,22 @@ func (player *Player) Update(levelX int, levelY int) {
 	moving := false
 	// UP
 	if keys[sdl.SCANCODE_W] == 1 {
-		player.move(0, -1)
+		player.Move(0, -1)
 		moving = true
 	}
 	// DOWN
 	if keys[sdl.SCANCODE_S] == 1 {
-		player.move(0, 1)
+		player.Move(0, 1)
 		moving = true
 	}
 	// LEFT
 	if keys[sdl.SCANCODE_A] == 1 {
-		player.move(-1, 0)
+		player.Move(-1, 0)
 		moving = true
 	}
 	// RIGHT
 	if keys[sdl.SCANCODE_D] == 1 {
-		player.move(1, 0)
+		player.Move(1, 0)
 		moving = true
 	}
 
@@ -117,7 +116,8 @@ func (player *Player) Update(levelX int, levelY int) {
 
 }
 
-func (player *Player) move(x float64, y float64) {
+// Move adjusts the players coordinates so that its rendered correctly on the next frame
+func (player *Player) Move(x float64, y float64) {
 	nextXStep := x * float64(speed)
 	leftBound := player.X+nextXStep < float64(speed)
 	rightBound := player.X+nextXStep > float64(winW-16)

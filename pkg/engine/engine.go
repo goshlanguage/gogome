@@ -39,11 +39,6 @@ func (e *Engine) Init() {
 	if err := ttf.Init(); err != nil {
 		checkErr(err)
 	}
-
-	font, err := ttf.OpenFont("fonts/monogram.ttf", 32)
-	checkErr(err)
-
-	e.Fonts = append(e.Fonts, font)
 }
 
 // Quit cleans up the engine's resources

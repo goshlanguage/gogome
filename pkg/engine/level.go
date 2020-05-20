@@ -17,6 +17,8 @@ type Level struct {
 	CameraX, CameraY int
 	// EntityMap entities and draws them on the map when they're in focus
 	EntityMap map[int]map[int]Entity
+	// Lighting takes a function that allows the user to play with lighting mechanics
+	Lighting func(*Level)
 	// represents how many pixels we scroll per cycle. default 16
 	ScrollSpeed int
 	Sounds      map[string][]*mix.Chunk
@@ -173,6 +175,9 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 			}
 
 		}
+		if level.Lighting != nil {
+			level.Lighting(level)
+		}
 	}
 
 	// Render a grid to the screen if debug is on
@@ -182,6 +187,7 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 			gfx.LineRGBA(renderer, int32(0), int32(i), int32(winW), int32(i), 100, 0, 0, 100)
 			gfx.LineRGBA(renderer, int32(i), int32(0), int32(i), int32(winH), 100, 0, 0, 100)
 		}
+		renderer.SetDrawColor(255, 255, 255, 255)
 	}
 }
 
