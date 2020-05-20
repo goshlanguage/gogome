@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
@@ -139,9 +141,11 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 					// Render the background of the level
 					renderer.Copy(
 						level.Texture,
-						&sdl.Rect{X: tile.X0 + int32(xOffset/2), Y: tile.Y0, W: int32(width), H: int32(height)},
+						&sdl.Rect{X: tile.X0, Y: tile.Y0, W: int32(width), H: int32(height)},
 						&sdl.Rect{X: int32(-level.TileSize + xOffset), Y: int32(-level.TileSize + yOffset), W: int32(level.TileSize), H: int32(level.TileSize)},
 					)
+					fmt.Printf("rendered at %d,%d\t", int32(-level.TileSize+xOffset), int32(-level.TileSize+yOffset))
+					fmt.Printf("w,h at %d,%d\n", width, height)
 				}
 			}
 
