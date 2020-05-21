@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
@@ -124,41 +122,6 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 	// Render level to window tile by tile
 	for x := 0; x < level.CameraX; x += level.ScrollSpeed {
 		for y := 0; y < level.CameraY; y += level.ScrollSpeed {
-
-			// Here's a little experiment, if level.X > 0, let's try to draw the last tile at a negative x value and see what we get
-			if (level.X > 0 || level.Y > 0) && x == 0 && y == 0 {
-				xOffset := level.X % level.TileSize
-				tileX := level.X - xOffset
-				yOffset := level.Y % level.TileSize
-				tileY := level.Y - yOffset
-
-				tiles := level.TileMap[tileX][tileY]
-				// Now that we've processed offsets and our tile for this iteration, range throuhg tiles and draw them
-				for _, tile := range tiles {
-					width := tile.X1 - tile.X0 - int32(xOffset)
-					height := tile.Y1 - tile.Y0 - int32(yOffset)
-					if xOffset < 16 {
-						width = tile.X1 - tile.X0 - (int32(xOffset) - 16
-					}
-					if yOffset < 16 {
-						height = tile.Y1 - tile.Y0 - int32(yOffset) - 16
-					}
-
-					// Render the background of the level
-					renderer.Copy(
-						level.Texture,
-						&sdl.Rect{X: tile.X0 + int32(xOffset), Y: tile.Y0 + int32(yOffset), W: int32(width), H: int32(height)},
-						&sdl.Rect{X: int32(x), Y: int32(y), W: int32(level.TileSize), H: int32(level.TileSize)},
-					)
-					fmt.Printf("rendered at %d,%d\tlevel xy: %d,%d\t", x, y, level.X, level.Y)
-					fmt.Printf("w,h at %d,%d\t", width, height)
-					fmt.Printf("TSw,TSh at %d,%d\t", int32(level.TileSize), int32(level.TileSize))
-					fmt.Printf("tx0,ty0 at %d,%d\t", tile.X0, tile.Y0)
-					fmt.Printf("tx1,ty1 at %d,%d\n", tile.X1, tile.Y1)
-
-				}
-			}
-
 			// Here is the information we need to know where to render all tiles
 			var xOffset int
 			var yOffset int
@@ -169,7 +132,8 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 			if x == 0 && level.X%level.TileSize != 0 {
 				xOffset = level.X % level.TileSize
 				tileX = level.X - xOffset
-			} else if y == 0 && level.Y%level.TileSize != 0 {
+			}
+			if y == 0 && level.Y%level.TileSize != 0 {
 				yOffset = level.Y % level.TileSize
 				tileY = level.Y - yOffset
 			}
