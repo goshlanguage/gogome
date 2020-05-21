@@ -92,7 +92,7 @@ func NewRandomizedLevel(filepath string, renderer *sdl.Renderer) (*Level, error)
 	}
 
 	grass := Tile{Name: "grass", X0: 0, X1: 16, Y0: 0, Y1: 16}
-	grass2 := Tile{Name: "grass2", X0: 272, X1: 303, Y0: 464, Y1: 495}
+	grass2 := Tile{Name: "grass2", X0: 272, X1: 288, Y0: 464, Y1: 480}
 	//bush := Tile{Name: "bush", X0: 32, X1: 48, Y0: 224, Y1: 240}
 	mapping := map[int]map[int][]Tile{}
 	level.EntityMap = map[int]map[int]Entity{}
@@ -135,17 +135,27 @@ func (level *Level) Draw(renderer *sdl.Renderer) {
 				tiles := level.TileMap[tileX][tileY]
 				// Now that we've processed offsets and our tile for this iteration, range throuhg tiles and draw them
 				for _, tile := range tiles {
-					width := tile.X1 - tile.X0
-					height := tile.Y1 - tile.Y0
+					width := tile.X1 - tile.X0 - int32(xOffset)
+					height := tile.Y1 - tile.Y0 - int32(yOffset)
+					if xOffset < 16 {
+						width = tile.X1 - tile.X0 - (int32(xOffset) - 16
+					}
+					if yOffset < 16 {
+						height = tile.Y1 - tile.Y0 - int32(yOffset) - 16
+					}
 
 					// Render the background of the level
 					renderer.Copy(
 						level.Texture,
-						&sdl.Rect{X: tile.X0, Y: tile.Y0, W: int32(width), H: int32(height)},
-						&sdl.Rect{X: int32(-level.TileSize + xOffset), Y: int32(-level.TileSize + yOffset), W: int32(level.TileSize), H: int32(level.TileSize)},
+						&sdl.Rect{X: tile.X0 + int32(xOffset), Y: tile.Y0 + int32(yOffset), W: int32(width), H: int32(height)},
+						&sdl.Rect{X: int32(x), Y: int32(y), W: int32(level.TileSize), H: int32(level.TileSize)},
 					)
-					fmt.Printf("rendered at %d,%d\t", int32(-level.TileSize+xOffset), int32(-level.TileSize+yOffset))
-					fmt.Printf("w,h at %d,%d\n", width, height)
+					fmt.Printf("rendered at %d,%d\tlevel xy: %d,%d\t", x, y, level.X, level.Y)
+					fmt.Printf("w,h at %d,%d\t", width, height)
+					fmt.Printf("TSw,TSh at %d,%d\t", int32(level.TileSize), int32(level.TileSize))
+					fmt.Printf("tx0,ty0 at %d,%d\t", tile.X0, tile.Y0)
+					fmt.Printf("tx1,ty1 at %d,%d\n", tile.X1, tile.Y1)
+
 				}
 			}
 
